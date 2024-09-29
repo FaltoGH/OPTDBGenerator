@@ -1078,7 +1078,7 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
         /// 5. 당일기준가가 0보다 큰 정수
         /// 6. 종목코드의 길이가 6
         /// </summary>
-        public string[] GetCommonCodes()
+        public HashSet<string> GetCommonCodes()
         {
             HashSet<string> ret = GetHashSetByMarket("0");//KOSPI
             ret.UnionWith(GetHashSetByMarket("10"));//KOSDAQ
@@ -1099,9 +1099,7 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
                 string s = GetStockMarketKind(x);
                 return s != "0" && s != "10";
             });
-            string[] ret2 = ret.ToArray();
-            Array.Sort(ret2);
-            return ret2;
+            return ret;
         }
 
         private Opt10081Row[] __2024_0001(object sender, _DKHOpenAPIEvents_OnReceiveTrDataEvent e)
@@ -1133,6 +1131,16 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
         public string GetMasterLastPriceRaw(string sTrCode)
         {
             return ocx.GetMasterLastPrice(sTrCode);
+        }
+
+        public string[] GetLast600MarketOpenDates()
+        {
+            string[] ret = GetOpt10081Rows("005930").Select(x => x.Date).ToArray();
+            if(ret.Length != 600)
+            {
+                throw new InvalidOperationException($"Expected array length 600, but actual {ret.Length}");
+            }
+            return ret;
         }
 
     }
