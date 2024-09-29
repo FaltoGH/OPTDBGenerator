@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35303.130
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opt10081DBGenerator", "Opt10081DBGenerator\Opt10081DBGenerator.csproj", "{7B185583-25F5-4386-8634-3B9FC50B6AFA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7B185583-25F5-4386-8634-3B9FC50B6AFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B185583-25F5-4386-8634-3B9FC50B6AFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B185583-25F5-4386-8634-3B9FC50B6AFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B185583-25F5-4386-8634-3B9FC50B6AFA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {51CD6F5A-ECB7-42D6-9DAA-0E87E638C4E9}
+	EndGlobalSection
+EndGlobal
