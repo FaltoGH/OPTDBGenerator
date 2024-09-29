@@ -11,17 +11,23 @@ namespace Opt10081DBGenerator
         public long Close;
         public long Volume;
         public long VolumeMoney;
+        public string Date;
         public long Open;
         public long High;
         public long Low;
         public long ModifyType;
         public string ModifyRatio;
-        public string Date;
+
         public static Opt10081Row FromDataEx(object[,] dataex, int i)
         {
             string ToString(int x)
             {
-                return dataex[i, x].ToString();
+                string s = dataex[i, x].ToString();
+                if (string.IsNullOrWhiteSpace(s))
+                {
+                    s = "0";
+                }
+                return s;
             }
             long ToLong(int x)
             {
@@ -40,6 +46,7 @@ namespace Opt10081DBGenerator
             ret.ModifyRatio = ToString(9);
             return ret;
         }
+
         public static Opt10081Row[] FromDataEx2(object[,] dataex)
         {
             int nrow = dataex.GetLength(0);
@@ -48,5 +55,16 @@ namespace Opt10081DBGenerator
                 ret[i] = Opt10081Row.FromDataEx(dataex, i);
             return ret;
         }
+
+        public override string ToString()
+        {
+            return $"({Close},{Volume},{VolumeMoney},'{Date}',{Open},{High},{Low},{ModifyType},'{ModifyRatio}')";
+        }
+
+        public static string ToValues(Opt10081Row[] rows)
+        {
+            return string.Join(", ", rows.Select(x => x.ToString()));
+        }
+
     }
 }

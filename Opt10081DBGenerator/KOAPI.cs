@@ -1078,7 +1078,7 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
         /// 5. 당일기준가가 0보다 큰 정수
         /// 6. 종목코드의 길이가 6
         /// </summary>
-        public HashSet<string> GetCommonCodes()
+        public string[] GetCommonCodes()
         {
             HashSet<string> ret = GetHashSetByMarket("0");//KOSPI
             ret.UnionWith(GetHashSetByMarket("10"));//KOSDAQ
@@ -1099,7 +1099,9 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
                 string s = GetStockMarketKind(x);
                 return s != "0" && s != "10";
             });
-            return ret;
+            string[] ret2 = ret.ToArray();
+            Array.Sort(ret2);
+            return ret2;
         }
 
         private Opt10081Row[] __2024_0001(object sender, _DKHOpenAPIEvents_OnReceiveTrDataEvent e)
