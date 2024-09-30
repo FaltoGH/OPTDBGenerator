@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7B185583-25F5-4386-8634-3B9FC50B6AFA}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Opt10081DBGenerator</RootNamespace>
-    <AssemblyName>Opt10081DBGenerator</AssemblyName>
+    <RootNamespace>OPTDBGenerator</RootNamespace>
+    <AssemblyName>OPTDBGenerator</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -63,12 +63,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="KOAPI.cs" />
-    <Compile Include="Market.cs" />
+    <Compile Include="Opt10059Gen.cs" />
+    <Compile Include="Opt10059Task.cs" />
+    <Compile Include="Opt10081Gen.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReturnAndPrevNext.cs" />
-    <Compile Include="Opt10081Row.cs" />
     <Compile Include="SQLExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +92,12 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libKHOpenAPI\libKHOpenAPI.csproj">
+      <Project>{d5a164bc-1ea0-4d1f-9e52-b5b378629681}</Project>
+      <Name>libKHOpenAPI</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

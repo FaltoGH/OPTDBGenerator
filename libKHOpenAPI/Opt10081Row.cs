@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Opt10081DBGenerator
+namespace libKHOpenAPI
 {
     public class Opt10081Row
     {
@@ -56,14 +56,14 @@ namespace Opt10081DBGenerator
             return ret;
         }
 
-        public override string ToString()
+        public string ToValue()
         {
             return $"({Close},{Volume},{VolumeMoney},'{Date}',{Open},{High},{Low},{ModifyType},'{ModifyRatio}')";
         }
 
         public static string ToValues(Opt10081Row[] rows)
         {
-            return string.Join(", ", rows.Select(x => x.ToString()));
+            return string.Join(", ", rows.Select(x => x.ToValue()));
         }
 
     }

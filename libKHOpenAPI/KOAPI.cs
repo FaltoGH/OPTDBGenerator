@@ -1,5 +1,4 @@
-﻿/*
-This is free and unencumbered software released into the public domain.
+﻿/*This is free and unencumbered software released into the public domain.
 Anyone is free to copy, modify, publish, use, compile, sell, or distribute
 this software, either in source code form or as a compiled binary, for any
 purpose, commercial or non-commercial, and by any means.
@@ -16,8 +15,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
 ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-For more information, please refer to <http://unlicense.org/>
-*/
+For more information, please refer to <http://unlicense.org/>*/
 using AxKHOpenAPILib;
 using System;
 using System.Collections.Concurrent;
@@ -30,19 +28,13 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using static System.Windows.Forms.AxHost;
-namespace Opt10081DBGenerator
+
+namespace libKHOpenAPI
 {
     public class KOAPI : IDisposable
     {
-        private class __2024_0002 : AxKHOpenAPI
-        {
-            public __2024_0002()
-            {
-                new Control().Controls.Add(this); //If this line is missing, System.Windows.Forms.AxHost+InvalidActiveXStateException will be thrown.
-                EndInit(); //If this line is missing, System.Windows.Forms.AxHost+InvalidActiveXStateException will be thrown.
-            }
-        }
-        private __2024_0002 ocx;
+        private AxKHOpenAPI ocx;
+
         public KOAPI()
         {
             //
@@ -56,7 +48,11 @@ namespace Opt10081DBGenerator
                     try
                     {
                         Application.CurrentCulture = new CultureInfo("ko-KR");
-                        ocx = new __2024_0002();
+                        ocx = new AxKHOpenAPI();
+                        //If this line is missing, System.Windows.Forms.AxHost+InvalidActiveXStateException will be thrown.
+                        new Control().Controls.Add(ocx);
+                        //If this line is missing, System.Windows.Forms.AxHost+InvalidActiveXStateException will be thrown.
+                        ocx.EndInit();
                         autoResetEvent.Set();
                         try
                         {
@@ -76,7 +72,8 @@ namespace Opt10081DBGenerator
                 thread.CurrentUICulture = new CultureInfo("ko-KR");
                 thread.CurrentCulture = new CultureInfo("ko-KR");
                 thread.Name = "axkh";
-                thread.SetApartmentState(ApartmentState.STA);//If this line is missing, System.Threading.ThreadStateException will be thrown.
+                //If this line is missing, System.Threading.ThreadStateException will be thrown.
+                thread.SetApartmentState(ApartmentState.STA);
                 thread.Start();
                 autoResetEvent.WaitOne();
             }
@@ -159,7 +156,7 @@ namespace Opt10081DBGenerator
                 Error(ex);
             }
         }
-        
+
         public event _DKHOpenAPIEvents_OnEventConnectEventHandler OnEventConnect;
         private readonly char[] m_separator = new char[] { ';' };
         private static readonly StringDictionary m_masterCodeName = new StringDictionary();
@@ -250,8 +247,9 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
         /// </summary>
         /// <exception cref="TimeoutException"/>
         /// <exception cref="System.Runtime.InteropServices.InvalidComObjectException"/>
-        public ReturnAndPrevNext CommRqDataSync(
-            string sRQName, string sTrCode, int nPrevNext, string sScreenNo, Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handler)
+        public RqResult CommRqDataSync(
+string sRQName, string sTrCode, int nPrevNext, string sScreenNo,
+Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handler)
         {
             m_commRqDataSync_handler = handler;
             m_commRqDataSync_sPrevNext = null;
@@ -260,11 +258,11 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
             returnCallback?.Invoke(ret);
             if (ret == 0)
             {
-                bool flag = m_commRqDataSync_are.WaitOne(10000);//10s
+                bool flag = m_commRqDataSync_are.WaitOne(10000);
                 if (!flag) throw new TimeoutException("CommRqDataSyncTimeout");
             }
             Thread.MemoryBarrier();
-            return new ReturnAndPrevNext(ret, m_commRqDataSync_sPrevNext);
+            return new RqResult(ret, m_commRqDataSync_sPrevNext);
         }
 
         public virtual int CommConnect()
@@ -305,8 +303,8 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
                 throw new InvalidActiveXStateException("CommRqData", ActiveXInvokeKind.MethodInvoke);
             }
 
-                int ret = ocx.CommRqData(sRQName, sTrCode, nPrevNext, sScreenNo);
-                return ret;
+            int ret = ocx.CommRqData(sRQName, sTrCode, nPrevNext, sScreenNo);
+            return ret;
         }
 
         public virtual string GetLoginInfo(string sTag)
@@ -319,12 +317,16 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
             return ocx.GetLoginInfo(sTag);
         }
 
-        public virtual int SendOrder(string sRQName, string sScreenNo, string sAccNo, int nOrderType, string sCode, int nQty, int nPrice, string sHogaGb, string sOrgOrderNo)
+        public virtual int SendOrder(
+string sRQName, string sScreenNo, string sAccNo, int nOrderType,
+string sCode, int nQty, int nPrice, string sHogaGb, string sOrgOrderNo)
         {
             throw new NotImplementedException();
         }
 
-        public virtual int SendOrderFO(string sRQName, string sScreenNo, string sAccNo, string sCode, int lOrdKind, string sSlbyTp, string sOrdTp, int lQty, string sPrice, string sOrgOrdNo)
+        public virtual int SendOrderFO(
+string sRQName, string sScreenNo, string sAccNo, string sCode,
+int lOrdKind, string sSlbyTp, string sOrdTp, int lQty, string sPrice, string sOrgOrdNo)
         {
             throw new NotImplementedException();
         }
@@ -349,7 +351,8 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
             return ocx.SetOutputFID(sID);
         }
 
-        public virtual string CommGetData(string sJongmokCode, string sRealType, string sFieldName, int nIndex, string sInnerFieldName)
+        public virtual string CommGetData(
+string sJongmokCode, string sRealType, string sFieldName, int nIndex, string sInnerFieldName)
         {
             if (ocx == null)
             {
@@ -787,14 +790,17 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
             return ocx.CommInvestRqData(sMarketGb, sRQName, sScreenNo);
         }
 
-        public virtual int SendOrderCredit(string sRQName, string sScreenNo, string sAccNo, int nOrderType, string sCode, int nQty, int nPrice, string sHogaGb, string sCreditGb, string sLoanDate, string sOrgOrderNo)
+        public virtual int SendOrderCredit(
+string sRQName, string sScreenNo, string sAccNo, int nOrderType,
+string sCode, int nQty, int nPrice, string sHogaGb, string sCreditGb, string sLoanDate, string sOrgOrderNo)
         {
             if (ocx == null)
             {
                 throw new InvalidActiveXStateException("SendOrderCredit", ActiveXInvokeKind.MethodInvoke);
             }
 
-            return ocx.SendOrderCredit(sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGb, sCreditGb, sLoanDate, sOrgOrderNo);
+            return ocx.SendOrderCredit(
+sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGb, sCreditGb, sLoanDate, sOrgOrderNo);
         }
 
         public virtual string KOA_Functions(string sFunctionName, string sParam)
@@ -1102,27 +1108,6 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
             return ret;
         }
 
-        private Opt10081Row[] __2024_0001(object sender, _DKHOpenAPIEvents_OnReceiveTrDataEvent e)
-        {
-            object commdataex = GetCommDataEx(e.sTrCode, e.sRecordName);
-            object[,] commdataex2 = (object[,])commdataex;
-            return Opt10081Row.FromDataEx2(commdataex2);
-        }
-
-        public Opt10081Row[] GetOpt10081Rows(string jmcode)
-        {
-            SetInputValue("종목코드",jmcode);
-            Opt10081Row[] ret = null;
-            AutoResetEvent are = new AutoResetEvent(false);
-            CommRqDataSync(NewRQName(), "OPT10081", 0, NewScrNo(), null, (o, e) =>
-            {
-                ret = __2024_0001(o, e);
-                are.Set();
-            });
-            are.WaitOne(0x3f3f3f3f);
-            return ret;
-        }
-
         public string GetCodeListByMarketRaw(string sMarket)
         {
             return ocx.GetCodeListByMarket(sMarket);
@@ -1132,16 +1117,5 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
         {
             return ocx.GetMasterLastPrice(sTrCode);
         }
-
-        public string[] GetLast600MarketOpenDates()
-        {
-            string[] ret = GetOpt10081Rows("005930").Select(x => x.Date).ToArray();
-            if(ret.Length != 600)
-            {
-                throw new InvalidOperationException($"Expected array length 600, but actual {ret.Length}");
-            }
-            return ret;
-        }
-
     }
 }

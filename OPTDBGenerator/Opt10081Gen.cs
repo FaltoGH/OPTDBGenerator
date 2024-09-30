@@ -1,43 +1,42 @@
-﻿using AxKHOpenAPILib;
+﻿using libKHOpenAPI;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Windows.Forms;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Opt10081DBGenerator
+namespace OPTDBGenerator
 {
-    internal static class Program
+    internal static class Opt10081Gen
     {
-        private static void Main(string[] args)
+        public static void GenerateDataBase(KOAPI api)
         {
             using (SQLiteConnection conn = new SQLiteConnection("Data Source=opt10081.db"))
             using (SQLiteCommand cmd = conn.CreateCommand())
-            using (KOAPI koapi = new KOAPI())
             {
                 conn.Open();
                 List<string> tables = cmd.GetAllTables();
-                koapi.CommConnectSync();
-                HashSet<string> commonCodes = koapi.GetCommonCodes();
-                string[] arrLast600 = koapi.GetLast600MarketOpenDates();
+                HashSet<string> commonCodes = api.GetCommonCodes();
+                string[] arrLast600 = Opt10081.Get600Dates(api);
                 HashSet<string> last600set = arrLast600.ToHashSet();
                 foreach (string table in tables)
                 {
-                    HashSet<string> dates = new HashSet<string>();
-                    cmd.CommandText = $"SELECT 일자 FROM '{table}'";
-                    SQLiteDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read())
+                    if (commonCodes.Contains(table))
                     {
-                        dates.Add(reader.GetString(0));
-                    }
-                    reader.Close();
-                    if (dates.SetEquals(last600set))
-                    {
-                        commonCodes.Remove(table);
-                        Console.WriteLine($"Skipped {table}");
+                        HashSet<string> dates = new HashSet<string>();
+                        cmd.CommandText = $"SELECT 일자 FROM '{table}'";
+                        SQLiteDataReader reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            dates.Add(reader.GetString(0));
+                        }
+                        reader.Close();
+                        if (dates.SetEquals(last600set))
+                        {
+                            commonCodes.Remove(table);
+                            Console.WriteLine($"Requirement already satisfied: {table}");
+                        }
                     }
                 }
 
@@ -47,7 +46,7 @@ namespace Opt10081DBGenerator
                 foreach (string jmcode in commonCodes)
                 {
                     if (i >= 4) break;
-                    Opt10081Row[] rows = koapi.GetOpt10081Rows(jmcode);
+                    Opt10081Row[] rows = Opt10081.GetOpt10081Rows(api, jmcode);
                     db.Add(new KeyValuePair<string, Opt10081Row[]>(jmcode, rows));
                     i++;
                 }
@@ -71,10 +70,16 @@ namespace Opt10081DBGenerator
                     cmd.ExecuteNonQuery();
                 }
 
+                foreach(string table in tables)
+                {
+                    if (!commonCodes.Contains(table))
+                    {
+                        cmd.CommandText = $"DROP TABLE '{table}'";
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
             }
-
         }
-
     }
-
 }

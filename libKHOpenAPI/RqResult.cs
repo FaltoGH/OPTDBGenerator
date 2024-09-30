@@ -1,10 +1,10 @@
-﻿namespace Opt10081DBGenerator
+﻿namespace libKHOpenAPI
 {
-    public struct ReturnAndPrevNext
+    public struct RqResult
     {
         public int Return;
         public string PrevNext;
-        public ReturnAndPrevNext(int retur, string prevNext)
+        public RqResult(int retur, string prevNext)
         {
             Return = retur;
             PrevNext = prevNext;
