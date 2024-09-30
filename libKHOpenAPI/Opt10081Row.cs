@@ -52,7 +52,7 @@ namespace libKHOpenAPI
             int nrow = dataex.GetLength(0);
             Opt10081Row[] ret = new Opt10081Row[nrow];
             for (int i = 0; i < nrow; i++)
-                ret[i] = Opt10081Row.FromDataEx(dataex, i);
+                ret[i] = FromDataEx(dataex, i);
             return ret;
         }
 

@@ -28,27 +28,7 @@ namespace OPTDBGenerator
             return ret;
         }
 
-        /// <param name="requiredDates">Must be sorted by descending order before function call.</param>
-        /// <returns>Descending order. Latest date is first. Oldest date is last.</returns>
-        private static List<string> GetAllMissingDates(string[] requiredDates, HashSet<string> existingDates)
-        {
-            List<string> ret = new List<string>();
-            int i=0;
-            while (i < requiredDates.Length)
-            {
-                bool? flag = existingDates?.Contains(requiredDates[i]);
-                if (flag==true)
-                {
-                    i++;
-                }
-                else
-                {
-                    ret.Add(requiredDates[i]);
-                    i += 100;
-                }
-            }
-            return ret;
-        }
+
 
         public static void GenerateDatabase(KOAPI api)
         {

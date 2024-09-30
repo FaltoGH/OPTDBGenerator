@@ -21,6 +21,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Runtime.InteropServices;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
@@ -242,12 +243,14 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
         private _DKHOpenAPIEvents_OnReceiveTrDataEventHandler m_commRqDataSync_handler;
         private readonly ManualResetEvent m_commRqDataSync_are = new ManualResetEvent(false);
         private string m_commRqDataSync_sPrevNext;
+
         /// <summary>
-        /// CommRqData and wait up to 10 seconds to invoke handler. Return after the handler is invoked.
+        /// Returns after invoking given handler is completely done.
         /// </summary>
+        /// <returns>Key is return value of CommRqData. Value is PrevNext=="2".</returns>
         /// <exception cref="TimeoutException"/>
-        /// <exception cref="System.Runtime.InteropServices.InvalidComObjectException"/>
-        public RqResult CommRqDataSync(
+        /// <exception cref="InvalidComObjectException"/>
+        public KeyValuePair<int,bool> CommRqDataSync(
 string sRQName, string sTrCode, int nPrevNext, string sScreenNo,
 Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handler)
         {
@@ -262,7 +265,7 @@ Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handle
                 if (!flag) throw new TimeoutException("CommRqDataSyncTimeout");
             }
             Thread.MemoryBarrier();
-            return new RqResult(ret, m_commRqDataSync_sPrevNext);
+            return new KeyValuePair<int,bool>(ret, m_commRqDataSync_sPrevNext=="2");
         }
 
         public virtual int CommConnect()
@@ -304,6 +307,7 @@ Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handle
             }
 
             int ret = ocx.CommRqData(sRQName, sTrCode, nPrevNext, sScreenNo);
+            todo
             return ret;
         }
 
