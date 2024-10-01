@@ -37,28 +37,30 @@ namespace OPTDBGenerator
                 conn.Open();
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
+                    //
+                    // Drop unnecessary tables
+                    //
                     HashSet<string> allTables = cmd.GetAllTables().ToHashSet();
                     HashSet<string> setCommonCodes = api.GetCommonCodes();
-
                     foreach(string table in allTables.Except(setCommonCodes))
                     {
                         cmd.CommandText = $"DROP TABLE '{table}'";
                         cmd.ExecuteNonQuery();
                     }
-
                     allTables.ExceptWith(setCommonCodes);
-
-                    string[] date600 = Opt10081.Get600Dates(api);
-
-                    List<Opt10059Task> tasks = new List<Opt10059Task>();
-
                     if (!allTables.IsSubsetOf(setCommonCodes))
                     {
                         throw new Exception("Table set is not a subset of common codes.");
                     }
-
+                    //
+                    // Request
+                    //
+                    string[] date600 = Opt10081.Get600Dates(api);
+                    List<KeyValuePair<string, List<KeyValuePair<Opt10059Row, Opt10059Row>>>> listDB;
+                    listDB = new List<KeyValuePair<string, List<KeyValuePair<Opt10059Row, Opt10059Row>>>>();
                     foreach(string commonCode in setCommonCodes)
                     {
+                        if (listDB.Count > 3) break;
                         HashSet<string> existingDates;
                         if (allTables.Contains(commonCode))
                         {
@@ -68,44 +70,54 @@ namespace OPTDBGenerator
                         {
                             existingDates = null;
                         }
-                        List<string> allMissingDates = GetAllMissingDates(date600, existingDates);
-                        if (allMissingDates.Count > 0)
+                        List<KeyValuePair<Opt10059Row, Opt10059Row>> pairs = Opt10059.GetOpt10059PairsWithExistingDates(
+api, commonCode, date600, existingDates);
+
+                        if(pairs == null)
                         {
-                            tasks.Add(new Opt10059Task(commonCode, allMissingDates));
+                        }
+                        else
+                        {
+                            listDB.Add(new KeyValuePair<string, List<KeyValuePair<Opt10059Row, Opt10059Row>>>(commonCode, pairs));
                         }
                     }
 
-                    List<KeyValuePair<string, Opt10059Pair[]>> listDB = new List<KeyValuePair<string, Opt10059Pair[]>>();
-
-                    byte i = 0;
-                    foreach (Opt10059Task task in tasks)
-                    {
-                        if (i >= 4) break;
-                        
-
-                        foreach (string date in task.Value)
-                        {
-                            Opt10059Row[] rows = Opt10059.GetOpt10059RowsBuy(api, task.Key);
-                            listDB.Add(new KeyValuePair<string, Opt10081Row[]>(jmcode, rows));
-                        }
-
-                        i++;
-                    }
-
-                    foreach (KeyValuePair<string, Opt10081Row[]> x in listDB)
+                    foreach (KeyValuePair<string, List<KeyValuePair<Opt10059Row, Opt10059Row>>> x in listDB)
                     {
                         string jmcode = x.Key;
-                        cmd.CommandText = $"DROP TABLE IF EXISTS '{jmcode}'";
-                        cmd.ExecuteNonQuery();
-                        cmd.CommandText = $@"CREATE TABLE '{jmcode}'(현재가 INTEGER,
-거래량 INTEGER,
-거래대금 INTEGER,
-일자 TEXT PRIMARY KEY,
-시가 INTEGER,
-고가 INTEGER,
-저가 INTEGER,
-수정주가구분 INTEGER,
-수정비율 TEXT)";
+                        cmd.CommandText = $@"CREATE TABLE IF NOT EXISTS '{jmcode}'(일자 TEXT PRIMARY KEY,
+현재가 INTEGER,
+대비기호 INTEGER,
+전일대비 INTEGER,
+등락율 TEXT,
+누적거래량 INTEGER,
+누적거래대금 INTEGER,
+개인투자자B INTEGER,
+외국인투자자B INTEGER,
+기관계B INTEGER,
+금융투자B INTEGER,
+보험B INTEGER,
+투신B INTEGER,
+기타금융B INTEGER,
+은행B INTEGER,
+연기금등B INTEGER,
+사모펀드B INTEGER,
+국가B INTEGER,
+기타법인B INTEGER,
+내외국인B INTEGER,
+개인투자자S INTEGER,
+외국인투자자S INTEGER,
+기관계S INTEGER,
+금융투자S INTEGER,
+보험S INTEGER,
+투신S INTEGER,
+기타금융S INTEGER,
+은행S INTEGER,
+연기금등S INTEGER,
+사모펀드S INTEGER,
+국가S INTEGER,
+기타법인S INTEGER,
+내외국인S INTEGER)";
                         cmd.ExecuteNonQuery();
                         cmd.CommandText = $"INSERT INTO '{jmcode}' VALUES " + Opt10081Row.ToValues(x.Value);
                         cmd.ExecuteNonQuery();

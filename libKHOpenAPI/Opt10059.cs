@@ -75,8 +75,9 @@ namespace libKHOpenAPI
         }
 
         /// <param name="requiredDates">Must be sorted by descending order before function call.</param>
-        /// <returns>Descending order. Latest date is first. Oldest date is last.</returns>
-        private static List<string> GetAllMissingDates(string[] requiredDates, HashSet<string> existingDates)
+        /// <param name="existingDates">This can be null.</param>
+        /// <returns>Descending order. Latest date is first. Oldest date is last. Return value is not null.</returns>
+        private static List<string> GetAllRqDates(string[] requiredDates, HashSet<string> existingDates)
         {
             List<string> ret = new List<string>();
             int i = 0;
@@ -96,10 +97,49 @@ namespace libKHOpenAPI
             return ret;
         }
 
-        private static KeyValuePair<Opt10059Row, Opt10059Row>[] GetOpt10059PairsByMissingDates(
-KOAPI api, string jmcode, List<string> missingDates)
+        /// <param name="rqDates">Must be sorted by descending order before function call.</param>
+        private static List<KeyValuePair<Opt10059Row, Opt10059Row>> GetOpt10059PairsByRqDates(
+KOAPI api, string jmcode, List<string> rqDates)
         {
-            GetOpt10059Pairs(api, )
+            List<KeyValuePair<Opt10059Row, Opt10059Row>> ret = new List<KeyValuePair<Opt10059Row, Opt10059Row>>();
+
+            bool first = true;
+            foreach(string rqDate in rqDates)
+            {
+                KeyValuePair<bool, KeyValuePair<Opt10059Row, Opt10059Row>[]>? pairs = GetOpt10059Pairs(api, rqDate, jmcode);
+                if (pairs == null)
+                {
+                    if (!first)
+                    {
+                        throw new Exception("Unnecessary request has been sent!");
+                    }
+                    return null;
+                }
+
+                ret.AddRange(pairs.Value.Value);
+                if (!pairs.Value.Key)
+                {
+                    return ret;
+                }
+
+                first = false;
+            }
+
+            return ret;
+        }
+
+        public static List<KeyValuePair<Opt10059Row, Opt10059Row>> GetOpt10059PairsWithExistingDates(KOAPI api, string jmcode,
+string[] requiredDates, HashSet<string> existingDates)
+        {
+            List<string> rqDates = GetAllRqDates(requiredDates, existingDates);
+            if(rqDates.Count <= 0)
+            {
+                return null;
+            }
+            else
+            {
+                return GetOpt10059PairsByRqDates(api, jmcode, rqDates);
+            }
         }
 
     }

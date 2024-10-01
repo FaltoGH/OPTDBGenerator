@@ -298,6 +298,8 @@ Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handle
             ocx.CommTerminate();
         }
 
+        public ISleeper Sleeper { get; set; } = new SafeSleeper();
+
         /// <exception cref="System.Runtime.InteropServices.InvalidComObjectException"/>
         public virtual int CommRqData(string sRQName, string sTrCode, int nPrevNext, string sScreenNo)
         {
@@ -305,9 +307,9 @@ Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handle
             {
                 throw new InvalidActiveXStateException("CommRqData", ActiveXInvokeKind.MethodInvoke);
             }
-
+            Sleeper.BeginRq();
             int ret = ocx.CommRqData(sRQName, sTrCode, nPrevNext, sScreenNo);
-            todo
+            Sleeper.EndRq(ret);
             return ret;
         }
 
@@ -909,6 +911,7 @@ sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGb, sCreditGb,
 
         public void Dispose()
         {
+            Sleeper?.Dispose();
             ocx?.Dispose();
         }
 
