@@ -42,13 +42,11 @@ namespace OPTDBGenerator
 
                 List<KeyValuePair<string, Opt10081Row[]>> db = new List<KeyValuePair<string, Opt10081Row[]>>();
 
-                byte i = 0;
-                foreach (string jmcode in commonCodes)
+                foreach (string jmcode in commonCodes.OrderBy(x=>x))
                 {
-                    if (i >= 4) break;
+                    if (db.Count > 1) break;
                     Opt10081Row[] rows = Opt10081.GetOpt10081Rows(api, jmcode);
                     db.Add(new KeyValuePair<string, Opt10081Row[]>(jmcode, rows));
-                    i++;
                 }
 
                 foreach (KeyValuePair<string, Opt10081Row[]> x in db)

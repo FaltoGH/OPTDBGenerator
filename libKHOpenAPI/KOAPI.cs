@@ -94,17 +94,6 @@ namespace libKHOpenAPI
             ocx.OnReceiveConditionVer += Ocx_OnReceiveConditionVer;
         }
 
-        private static void Error(object x)
-        {
-            Console.WriteLine(x.ToString());
-        }
-
-        private static void Info(object x)
-        {
-            Console.WriteLine(x.ToString());
-        }
-
-
         public event _DKHOpenAPIEvents_OnReceiveConditionVerEventHandler OnReceiveConditionVer;
         private void Ocx_OnReceiveConditionVer(object sender, _DKHOpenAPIEvents_OnReceiveConditionVerEvent e)
         {
@@ -114,7 +103,7 @@ namespace libKHOpenAPI
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -128,7 +117,7 @@ namespace libKHOpenAPI
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -141,7 +130,7 @@ namespace libKHOpenAPI
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -154,7 +143,7 @@ namespace libKHOpenAPI
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -176,23 +165,23 @@ namespace libKHOpenAPI
                     }
                     if (IsTestServerConnected)
                     {
-                        Info("Connected to test server.");
+                        Console.WriteLine("Connected to test server.");
                     }
                     else
                     {
-                        Info("Connected to real server.");
+                        Console.WriteLine("Connected to real server.");
                     }
                     m_commConnectSyncARE.Set();
                 }
                 else
                 {
-                    Error($"OnEventConnect error code is {e.nErrCode}.");
+                    Console.WriteLine($"OnEventConnect error code is {e.nErrCode}.");
                 }
                 OnEventConnect?.Invoke(sender, e);
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -202,12 +191,12 @@ namespace libKHOpenAPI
             try
             {
                 if (e != null)
-                    Info($"OnReceiveMsg({e.sMsg},{e.sRQName},{e.sTrCode},{e.sScrNo})");
+                    Console.WriteLine($"OnReceiveMsg({e.sMsg},{e.sRQName},{e.sTrCode},{e.sScrNo})");
                 OnReceiveMsg?.Invoke(sender, e);
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -220,7 +209,7 @@ namespace libKHOpenAPI
                 if (e != null)
                 {
                     m_onReceiveTrDataCount++;
-                    Info(
+                    Console.WriteLine(
 $"#{m_onReceiveTrDataCount} OnReceiveTrData(" +
 $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErrorCode},{e.sMessage},{e.sScrNo},{e.sSplmMsg})");
                 }
@@ -233,7 +222,7 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -276,7 +265,7 @@ Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handle
             }
 
             int ret = ocx.CommConnect();
-            Info("CommConnect()=" + ret);
+            Console.WriteLine("CommConnect()=" + ret);
             return ret;
         }
 
@@ -398,7 +387,7 @@ string sJongmokCode, string sRealType, string sFieldName, int nIndex, string sIn
 
             int ret = ocx.CommKwRqData(sArrCode, bNext, nCodeCount, nTypeFlag, sRQName, sScreenNo);
             m_commKwRqDataCount++;
-            Info($"#{m_commKwRqDataCount} CommKwRqData({sArrCode},{bNext},{nCodeCount},{nTypeFlag},{sRQName},{sScreenNo})={ret}");
+            Console.WriteLine($"#{m_commKwRqDataCount} CommKwRqData({sArrCode},{bNext},{nCodeCount},{nTypeFlag},{sRQName},{sScreenNo})={ret}");
             return ret;
         }
 

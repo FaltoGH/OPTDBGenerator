@@ -56,11 +56,12 @@ namespace OPTDBGenerator
                     // Request
                     //
                     string[] date600 = Opt10081.Get600Dates(api);
+                    string lastDate = date600.Last();
                     List<KeyValuePair<string, List<KeyValuePair<Opt10059Row, Opt10059Row>>>> listDB;
                     listDB = new List<KeyValuePair<string, List<KeyValuePair<Opt10059Row, Opt10059Row>>>>();
-                    foreach(string commonCode in setCommonCodes)
+                    foreach(string commonCode in setCommonCodes.OrderBy(x=>x))
                     {
-                        if (listDB.Count > 3) break;
+                        if (listDB.Count > 0) break;
                         HashSet<string> existingDates;
                         if (allTables.Contains(commonCode))
                         {
@@ -70,11 +71,13 @@ namespace OPTDBGenerator
                         {
                             existingDates = null;
                         }
+
                         List<KeyValuePair<Opt10059Row, Opt10059Row>> pairs = Opt10059.GetOpt10059PairsWithExistingDates(
 api, commonCode, date600, existingDates);
 
                         if(pairs == null)
                         {
+                            Console.WriteLine($"Requirement already satisfied: {commonCode}");
                         }
                         else
                         {
@@ -82,9 +85,9 @@ api, commonCode, date600, existingDates);
                         }
                     }
 
-                    foreach (KeyValuePair<string, List<KeyValuePair<Opt10059Row, Opt10059Row>>> x in listDB)
+                    foreach (KeyValuePair<string, List<KeyValuePair<Opt10059Row, Opt10059Row>>> row in listDB)
                     {
-                        string jmcode = x.Key;
+                        string jmcode = row.Key;
                         cmd.CommandText = $@"CREATE TABLE IF NOT EXISTS '{jmcode}'(일자 TEXT PRIMARY KEY,
 현재가 INTEGER,
 대비기호 INTEGER,
@@ -119,7 +122,18 @@ api, commonCode, date600, existingDates);
 기타법인S INTEGER,
 내외국인S INTEGER)";
                         cmd.ExecuteNonQuery();
-                        cmd.CommandText = $"INSERT INTO '{jmcode}' VALUES " + Opt10081Row.ToValues(x.Value);
+                        cmd.CommandText = $"INSERT OR IGNORE INTO '{jmcode}' VALUES " + Opt10059Pair.ToValues(
+row.Value.ConvertAll(x=>new Opt10059Pair(x)));
+                        try
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
+                        catch(Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                            Console.WriteLine(cmd.CommandText);
+                        }
+                        cmd.CommandText = $"DELETE FROM '{jmcode}' WHERE 일자 < '{lastDate}'";
                         cmd.ExecuteNonQuery();
                     }
 

@@ -63,7 +63,7 @@ namespace libKHOpenAPI
 
         public static string ToValues(Opt10081Row[] rows)
         {
-            return string.Join(", ", rows.Select(x => x.ToValue()));
+            return string.Join(",", rows.Select(x => x.ToValue()));
         }
 
     }

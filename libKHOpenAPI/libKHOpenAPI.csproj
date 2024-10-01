@@ -46,6 +46,7 @@
     <Compile Include="KOAPI.cs" />
     <Compile Include="Market.cs" />
     <Compile Include="Opt10059.cs" />
+    <Compile Include="Opt10059Pair.cs" />
     <Compile Include="Opt10059Row.cs" />
     <Compile Include="Opt10081.cs" />
     <Compile Include="Opt10081Row.cs" />

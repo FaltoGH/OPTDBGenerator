@@ -50,7 +50,7 @@ namespace libKHOpenAPI
             return __2024_0003(api, date, jmcode, "2");
         }
 
-        /// <returns>Key is PrevNext=="2". Value is Opt10059 pairs. If row count is zero, returns null.</returns>
+        /// <returns>Key is PrevNext=="2". Value is Opt10059 pairs. Pair's key is buy. Pair's value is sell. If row count is zero, returns null.</returns>
         private static KeyValuePair<bool, KeyValuePair<Opt10059Row,Opt10059Row>[]>? GetOpt10059Pairs(KOAPI api, string date, string jmcode)
         {
             KeyValuePair<bool, Opt10059Row[]> buy = GetOpt10059RowsBuy(api, date, jmcode);
@@ -58,7 +58,7 @@ namespace libKHOpenAPI
             {
                 return null;
             }
-            KeyValuePair<bool, Opt10059Row[]> sell = GetOpt10059RowsBuy(api, date, jmcode);
+            KeyValuePair<bool, Opt10059Row[]> sell = GetOpt10059RowsSell(api, date, jmcode);
 
             if (buy.Value.Length != sell.Value.Length)
             {
