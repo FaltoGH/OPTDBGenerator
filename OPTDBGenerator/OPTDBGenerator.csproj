@@ -64,7 +64,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Opt10059Gen.cs" />
-    <Compile Include="Opt10059Task.cs" />
     <Compile Include="Opt10081Gen.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

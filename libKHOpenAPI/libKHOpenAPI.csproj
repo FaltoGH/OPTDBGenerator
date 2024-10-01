@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ISleeper.cs" />
     <Compile Include="KOAPI.cs" />
     <Compile Include="Market.cs" />
     <Compile Include="Opt10059.cs" />
@@ -50,7 +51,7 @@
     <Compile Include="Opt10081.cs" />
     <Compile Include="Opt10081Row.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RqResult.cs" />
+    <Compile Include="SafeSleeper.cs" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="AxKHOpenAPILib">

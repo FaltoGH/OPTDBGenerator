@@ -21,6 +21,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Runtime.InteropServices;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
@@ -93,17 +94,6 @@ namespace libKHOpenAPI
             ocx.OnReceiveConditionVer += Ocx_OnReceiveConditionVer;
         }
 
-        private static void Error(object x)
-        {
-            Console.WriteLine(x.ToString());
-        }
-
-        private static void Info(object x)
-        {
-            Console.WriteLine(x.ToString());
-        }
-
-
         public event _DKHOpenAPIEvents_OnReceiveConditionVerEventHandler OnReceiveConditionVer;
         private void Ocx_OnReceiveConditionVer(object sender, _DKHOpenAPIEvents_OnReceiveConditionVerEvent e)
         {
@@ -113,7 +103,7 @@ namespace libKHOpenAPI
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -127,7 +117,7 @@ namespace libKHOpenAPI
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -140,7 +130,7 @@ namespace libKHOpenAPI
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -153,7 +143,7 @@ namespace libKHOpenAPI
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -175,23 +165,23 @@ namespace libKHOpenAPI
                     }
                     if (IsTestServerConnected)
                     {
-                        Info("Connected to test server.");
+                        Console.WriteLine("Connected to test server.");
                     }
                     else
                     {
-                        Info("Connected to real server.");
+                        Console.WriteLine("Connected to real server.");
                     }
                     m_commConnectSyncARE.Set();
                 }
                 else
                 {
-                    Error($"OnEventConnect error code is {e.nErrCode}.");
+                    Console.WriteLine($"OnEventConnect error code is {e.nErrCode}.");
                 }
                 OnEventConnect?.Invoke(sender, e);
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -201,12 +191,12 @@ namespace libKHOpenAPI
             try
             {
                 if (e != null)
-                    Info($"OnReceiveMsg({e.sMsg},{e.sRQName},{e.sTrCode},{e.sScrNo})");
+                    Console.WriteLine($"OnReceiveMsg({e.sMsg},{e.sRQName},{e.sTrCode},{e.sScrNo})");
                 OnReceiveMsg?.Invoke(sender, e);
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -219,7 +209,7 @@ namespace libKHOpenAPI
                 if (e != null)
                 {
                     m_onReceiveTrDataCount++;
-                    Info(
+                    Console.WriteLine(
 $"#{m_onReceiveTrDataCount} OnReceiveTrData(" +
 $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErrorCode},{e.sMessage},{e.sScrNo},{e.sSplmMsg})");
                 }
@@ -232,7 +222,7 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
             }
             catch (Exception ex)
             {
-                Error(ex);
+                Console.WriteLine(ex);
             }
         }
 
@@ -242,12 +232,14 @@ $"{e.sTrCode},{e.sPrevNext},{e.sRecordName},{e.sRQName},{e.nDataLength},{e.sErro
         private _DKHOpenAPIEvents_OnReceiveTrDataEventHandler m_commRqDataSync_handler;
         private readonly ManualResetEvent m_commRqDataSync_are = new ManualResetEvent(false);
         private string m_commRqDataSync_sPrevNext;
+
         /// <summary>
-        /// CommRqData and wait up to 10 seconds to invoke handler. Return after the handler is invoked.
+        /// Returns after invoking given handler is completely done.
         /// </summary>
+        /// <returns>Key is return value of CommRqData. Value is PrevNext=="2".</returns>
         /// <exception cref="TimeoutException"/>
-        /// <exception cref="System.Runtime.InteropServices.InvalidComObjectException"/>
-        public RqResult CommRqDataSync(
+        /// <exception cref="InvalidComObjectException"/>
+        public KeyValuePair<int,bool> CommRqDataSync(
 string sRQName, string sTrCode, int nPrevNext, string sScreenNo,
 Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handler)
         {
@@ -262,7 +254,7 @@ Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handle
                 if (!flag) throw new TimeoutException("CommRqDataSyncTimeout");
             }
             Thread.MemoryBarrier();
-            return new RqResult(ret, m_commRqDataSync_sPrevNext);
+            return new KeyValuePair<int,bool>(ret, m_commRqDataSync_sPrevNext=="2");
         }
 
         public virtual int CommConnect()
@@ -273,7 +265,7 @@ Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handle
             }
 
             int ret = ocx.CommConnect();
-            Info("CommConnect()=" + ret);
+            Console.WriteLine("CommConnect()=" + ret);
             return ret;
         }
 
@@ -295,6 +287,8 @@ Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handle
             ocx.CommTerminate();
         }
 
+        public ISleeper Sleeper { get; set; } = new SafeSleeper();
+
         /// <exception cref="System.Runtime.InteropServices.InvalidComObjectException"/>
         public virtual int CommRqData(string sRQName, string sTrCode, int nPrevNext, string sScreenNo)
         {
@@ -302,8 +296,9 @@ Action<int> returnCallback, _DKHOpenAPIEvents_OnReceiveTrDataEventHandler handle
             {
                 throw new InvalidActiveXStateException("CommRqData", ActiveXInvokeKind.MethodInvoke);
             }
-
+            Sleeper.BeginRq();
             int ret = ocx.CommRqData(sRQName, sTrCode, nPrevNext, sScreenNo);
+            Sleeper.EndRq(ret);
             return ret;
         }
 
@@ -392,7 +387,7 @@ string sJongmokCode, string sRealType, string sFieldName, int nIndex, string sIn
 
             int ret = ocx.CommKwRqData(sArrCode, bNext, nCodeCount, nTypeFlag, sRQName, sScreenNo);
             m_commKwRqDataCount++;
-            Info($"#{m_commKwRqDataCount} CommKwRqData({sArrCode},{bNext},{nCodeCount},{nTypeFlag},{sRQName},{sScreenNo})={ret}");
+            Console.WriteLine($"#{m_commKwRqDataCount} CommKwRqData({sArrCode},{bNext},{nCodeCount},{nTypeFlag},{sRQName},{sScreenNo})={ret}");
             return ret;
         }
 
@@ -905,6 +900,7 @@ sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGb, sCreditGb,
 
         public void Dispose()
         {
+            Sleeper?.Dispose();
             ocx?.Dispose();
         }
 
